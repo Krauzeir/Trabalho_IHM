@@ -1,0 +1,41 @@
+{
+    "versao": "0.1",
+    "trabalhadores": [
+        {
+            "id": "trabalhador001",
+            "nome": "Randall Pearson",
+            "idade": 36,
+            "carteira": "Regular",
+            "endereco": "Rua A 123",
+            "fotos": [
+                "faces/randall1.jpg",
+                "faces/randall2.jpg",
+                "faces/randall3.jpg"
+            ]
+        },
+        {
+            "id": "trabalhador002",
+            "nome": "Rebecca Pearson",
+            "idade": 28,
+            "carteira": "Irregular",
+            "endereco": "Rua B 456",
+            "fotos": [
+                "faces/rebecca1.jpg",
+                "faces/rebecca2.jpg",
+                "faces/rebecca3.jpg"
+            ]
+        },
+        {
+            "id": "trabalhador003",
+            "nome": "Toby Damon",
+            "idade": 26,
+            "carteira": "Regular",
+            "endereco": "Rua C 789",
+            "fotos": [
+                "faces/toby1.jpg",
+                "faces/toby2.jpg",
+                "faces/toby3.jpg"
+            ]
+        }
+    ]
+}
