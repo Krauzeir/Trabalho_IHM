@@ -3,21 +3,23 @@
     "trabalhadores": [
         {
             "id": "trabalhador001",
-            "nome": "Randall Pearson",
+            "nome": "Kevin Pearson",
             "idade": 36,
-            "carteira": "Regular",
+            "status": "Regular",
+            "empresa": "Amazon",
             "endereco": "Rua A 123",
             "fotos": [
-                "faces/randall1.jpg",
-                "faces/randall2.jpg",
-                "faces/randall3.jpg"
+                "faces/kevin1.jpg",
+                "faces/kevin2.jpg",
+                "faces/kevin3.jpg"
             ]
         },
         {
             "id": "trabalhador002",
             "nome": "Rebecca Pearson",
             "idade": 28,
-            "carteira": "Irregular",
+            "status": "Regular",
+            "empresa": "Correios",
             "endereco": "Rua B 456",
             "fotos": [
                 "faces/rebecca1.jpg",
@@ -29,7 +31,8 @@
             "id": "trabalhador003",
             "nome": "Toby Damon",
             "idade": 26,
-            "carteira": "Regular",
+            "status": "Regular",
+            "empresa": "Jadlog",
             "endereco": "Rua C 789",
             "fotos": [
                 "faces/toby1.jpg",

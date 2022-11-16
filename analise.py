@@ -9,27 +9,28 @@ FOTOS_MOTORISTAS = [
     "faces/personagens1.jpg",
     "faces/personagens2.jpg",
     "faces/personagens3.jpg",
-    "faces/personagens4.jpg"
+    "faces/personagens4.jpg",
+    "faces/personagens5.jpg",
 ]
 
 # Arquivo de Configuração / Mock
 ARQUIVO_DE_CONFIGURACAO = "configuracao.json"
 
-# Probabilidades 
-PROBABILIDADE_DE_PERIGOSO = 20
-PROBABILIDADE_DE_LADRAO = 20
-PROBABILIDADE_DE_IRREGULAR = 30
-PROBABILIDADE_DE_TRANSPORTE_DE_EMPRESA = 30
+# Probabilidades
+PROBABILIDADE_DE_IRREGULARIEDADE = 20
+PROBABILIDADE_DE_IRREGULARIEDADE_BAIXA = 70
+PROBABILIDADE_DE_IRREGULARIEDADE_ALTA = 30
 
-TEMPO_MEDIO_DE_ANALISE = 40
+
 
 # Tempos relacionados a ação a ser executada
-TEMPO_DE_DETECCAO_DE_TRABLHADOR = 40
-TEMPO_DE_ACIONAR_POLICIA = 30
+TEMPO_DE_DETECCAO_DE_TRABALHADOR = 40
 TEMPO_DE_LIBERACAO_DE_TRABALHADOR = 80
-TEMPO_DE_ENQUADRO = 80
-TEMPO_DE_PRENDER_MOTORISTA = 50
+TEMPO_MEDIO_DE_ANALISE = 40
+TEMPO_MEDIO_DE_MULTA = 60
 
+
+# Ler configuracoes e preparar estruturas de dados
 def preparar():
     global configuracao
 
@@ -46,6 +47,7 @@ def preparar():
     global trabalhadores_reconhecidos
     trabalhadores_reconhecidos = {}
 
+
 def simular_chegadas():
     foto = random.choice(FOTOS_MOTORISTAS)
     print(f"foto de motoristas: {foto}")
@@ -57,6 +59,8 @@ def simular_chegadas():
 
     return motoristas
 
+
+# Validação de trabalhor que foi reconhecido
 def trabalhador_reconhecido_previamente(trabalhador):
     global trabalhadores_reconhecidos
 
@@ -70,7 +74,7 @@ def trabalhador_reconhecido_previamente(trabalhador):
     return reconhecido_previamente
 
 
-
+# Reconhece quem é motorista que trabalha para alguma empresa entre motoristas
 def reconhecer_trabalhadores(motoristas):
     global configuracao
 
@@ -89,17 +93,20 @@ def reconhecer_trabalhadores(motoristas):
                 foto = reconhecedor.load_image_file(foto)
                 caracteristicas = reconhecedor.face_encodings(foto)[0]
 
-                reconhecimentos = reconhecedor.compare_faces(caracteristicas_dos_motoristas, caracteristicas)
-                if True in reconhecimentos:
+                reconhecimentos = reconhecedor.compare_faces(
+                    caracteristicas_dos_motoristas, caracteristicas)
+                if True in reconhecimentos and trabalhador['status']=="Regular":
                     total_de_reconhecimentos += 1
 
             if total_de_reconhecimentos/len(fotos) >= 0.6:
                 trabalhadores.append(trabalhador)
         else:
-            print("trabalhador reconhecido previamente")
+            print("Trabalhador(es) reconhecido previamente.")
 
     return (len(trabalhadores) > 0), trabalhadores
 
+
+# Imprimir dados do trabalhador
 def imprimir_dados_do_trabalhador(trabalhador):
     print(colored.fg('black'), colored.bg(
         'yellow'), f"trabalhador reconhecido em {ambiente_de_simulacao.now}", colored.attr('reset'))
@@ -110,38 +117,101 @@ def imprimir_dados_do_trabalhador(trabalhador):
     print(colored.fg('black'), colored.bg(
         'yellow'), f"endereço: {trabalhador['endereco']}", colored.attr('reset'))
     print(colored.fg('black'), colored.bg(
-        'yellow'), f"carteira: {trabalhador['carteira']}", colored.attr('reset'))
+        'yellow'), f"trabalha para: {trabalhador['empresa']}", colored.attr('reset'))
+    print('-----------------')
 
+
+# Reconhece a face dos motoristas
 def reconhecer_motoristas(ambiente_de_simulacao):
     global trabalhadores_reconhecidos
 
     while True:
-        print(f"tentando reconhecer um trabalhador entre motoristas em {ambiente_de_simulacao.now}")
+        print(
+            f"tentando reconhecer um trabalhador entre motoristas em {ambiente_de_simulacao.now}")
 
         motoristas = simular_chegadas()
-        ocorreram_reconhecimentos, trabalhadores = reconhecer_trabalhadores(motoristas)
+        ocorreram_reconhecimentos, trabalhadores = reconhecer_trabalhadores(
+            motoristas)
         if ocorreram_reconhecimentos:
             for trabalhador in trabalhadores:
                 trabalhador["tempo_para_liberacao"] = ambiente_de_simulacao.now + \
                     TEMPO_DE_LIBERACAO_DE_TRABALHADOR
-                #trabalhador["em_emergencia"] = False
-                #trabalhador["em_uti"] = False
+                trabalhador["em_analise_irregulariedade"] = False
+                trabalhador["irregular"] = False
+                trabalhador['preso'] = False
 
                 id_atendimento = secrets.token_hex(nbytes=16).upper()
                 trabalhadores_reconhecidos[id_atendimento] = trabalhador
 
+                # imprimir informações do trabalhador
                 imprimir_dados_do_trabalhador(trabalhador)
+            
+        yield ambiente_de_simulacao.timeout(TEMPO_DE_DETECCAO_DE_TRABALHADOR)
 
-        yield ambiente_de_simulacao.timeout(TEMPO_DE_DETECCAO_DE_TRABLHADOR)
 
+def liberar_trabalhador(ambiente_de_simulacao):
+    global trabalhadores_reconhecidos
+
+    while True:
+        print(
+            f"tentando liberar um trabalhador em {ambiente_de_simulacao.now}")
+
+        if len(trabalhadores_reconhecidos):
+            for id_atendimento, trabalhador in list(trabalhadores_reconhecidos.items()):
+                if not trabalhador["em_analise_irregulariedade"] and trabalhador['preso']!=True and ambiente_de_simulacao.now >= trabalhador["tempo_para_liberacao"]:
+                    trabalhador_liberado = (random.randint(
+                        1, 100) >= PROBABILIDADE_DE_IRREGULARIEDADE)
+                    if trabalhador_liberado:
+                        trabalhadores_reconhecidos.pop(id_atendimento)
+                        print(colored.fg('white'), colored.bg('green'),
+                              f"liberando {trabalhador['nome']} em {ambiente_de_simulacao.now}", colored.attr('reset'))
+                    else:
+                        trabalhador["irregular"] = True
+
+        yield ambiente_de_simulacao.timeout(TEMPO_DE_LIBERACAO_DE_TRABALHADOR)
+
+
+def analisar_irregulariedade(ambiente_de_simulacao):
+    global trabalhadores_reconhecidos
+
+    while True:
+        print(
+            f"tentando identificar a irregulariedade {ambiente_de_simulacao.now}")
+
+        if len(trabalhadores_reconhecidos):
+            for id_atendimento, trabalhador in list(trabalhadores_reconhecidos.items()):
+                if trabalhador["irregular"] and trabalhador["preso"]==False:
+                    situacao_reconhecida1 = (random.randint(
+                        1, 100) <= PROBABILIDADE_DE_IRREGULARIEDADE_BAIXA)
+                    situacao_reconhecida2 = (random.randint(
+                        1, 100) <= PROBABILIDADE_DE_IRREGULARIEDADE_ALTA)         
+                    if situacao_reconhecida1:
+                        multa = random.randint(100, 300)
+                        print(colored.fg('white'), colored.bg('blue'),
+                              f"trabalhador {trabalhador['nome']} em situação de irregulariedade BAIXA em {ambiente_de_simulacao.now}", colored.attr('reset'))
+                        print(colored.fg('white'), colored.bg('blue'),
+                              f"Aplicado multa no valor de R${multa}", colored.attr('reset'))
+                        print('-----------')
+                        situacao_reconhecida2 = False
+                        
+                        yield ambiente_de_simulacao.timeout(TEMPO_MEDIO_DE_MULTA)
+                    if situacao_reconhecida2:
+                        print(colored.fg('white'), colored.bg('red'),f"Acionando policia para o atendimento {id_atendimento}",colored.attr('reset'))
+                        acionar_policia(trabalhador)
+                        trabalhadores_reconhecidos[id_atendimento]["preso"] = True
+
+        yield ambiente_de_simulacao.timeout(TEMPO_MEDIO_DE_ANALISE)
+
+def acionar_policia(trabalhador):
+    print(colored.fg('white'), colored.bg('red'),f"Policia acionada para apreensão do trabalhador {trabalhador['nome']}",colored.attr('reset'))
+    print('-----------')
+    trabalhador['status'] = "Irregular"   
 
 if __name__ == "__main__":
     preparar()
 
-    ambiente_de_simulacao = simpy.Environment()
+    ambiente_de_simulacao=simpy.Environment()
     ambiente_de_simulacao.process(reconhecer_motoristas(ambiente_de_simulacao))
-    #ambiente_de_simulacao.process(liberar_paciente(ambiente_de_simulacao))
-    #ambiente_de_simulacao.process(identificar_emergencia(ambiente_de_simulacao))
-    #ambiente_de_simulacao.process(reservar_uti(ambiente_de_simulacao))
-    #ambiente_de_simulacao.process(liberar_leito_da_uti(ambiente_de_simulacao))
-    ambiente_de_simulacao.run(until=1000)
+    ambiente_de_simulacao.process(liberar_trabalhador(ambiente_de_simulacao))
+    ambiente_de_simulacao.process(analisar_irregulariedade(ambiente_de_simulacao))
+    ambiente_de_simulacao.run(until=2000)
