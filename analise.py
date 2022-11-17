@@ -9,15 +9,14 @@ FOTOS_MOTORISTAS = [
     "faces/personagens1.jpg",
     "faces/personagens2.jpg",
     "faces/personagens3.jpg",
-    "faces/personagens4.jpg",
-    "faces/personagens5.jpg",
+    "faces/personagens4.jpg"
 ]
 
 # Arquivo de Configuração / Mock
 ARQUIVO_DE_CONFIGURACAO = "configuracao.json"
 
 # Probabilidades
-PROBABILIDADE_DE_IRREGULARIEDADE = 20
+PROBABILIDADE_DE_IRREGULARIEDADE = 30
 PROBABILIDADE_DE_IRREGULARIEDADE_BAIXA = 70
 PROBABILIDADE_DE_IRREGULARIEDADE_ALTA = 30
 
