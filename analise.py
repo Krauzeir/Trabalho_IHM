@@ -27,6 +27,7 @@ TEMPO_DE_DETECCAO_DE_TRABALHADOR = 40
 TEMPO_DE_LIBERACAO_DE_TRABALHADOR = 80
 TEMPO_MEDIO_DE_ANALISE = 40
 TEMPO_MEDIO_DE_MULTA = 60
+TEMPO_POLICIA = 40
 
 
 # Ler configuracoes e preparar estruturas de dados
@@ -195,16 +196,36 @@ def analisar_irregulariedade(ambiente_de_simulacao):
                         
                         yield ambiente_de_simulacao.timeout(TEMPO_MEDIO_DE_MULTA)
                     if situacao_reconhecida2:
-                        print(colored.fg('white'), colored.bg('red'),f"Acionando policia para o atendimento {id_atendimento}",colored.attr('reset'))
-                        acionar_policia(trabalhador)
                         trabalhadores_reconhecidos[id_atendimento]["preso"] = True
-
+                        print(colored.fg('white'), colored.bg('red'),f"Acionando policia para o atendimento {id_atendimento}",colored.attr('reset'))
+                        print('-----------')
+                        acionar_policia(trabalhador)
+                        
         yield ambiente_de_simulacao.timeout(TEMPO_MEDIO_DE_ANALISE)
 
+def contar_trabalhadores_perigosos():
+    global trabalhadores_reconhecidos
+
+    quant_irregulares_alta = 0
+    for trabalhador in trabalhadores_reconhecidos.values():
+        if trabalhador["preso"]:
+            quant_irregulares_alta  += 1
+
+    return quant_irregulares_alta 
+
 def acionar_policia(trabalhador):
-    print(colored.fg('white'), colored.bg('red'),f"Policia acionada para apreensão do trabalhador {trabalhador['nome']}",colored.attr('reset'))
-    print('-----------')
-    trabalhador['status'] = "Irregular"   
+    global trabalhadores_reconhecidos
+    
+    while True:
+        print(colored.fg('white'), colored.bg('red'),f"Sistema validando se existe algum trabalhor que seja necessário ser preso",colored.attr('reset'))
+        
+        for trabalhador in trabalhadores_reconhecidos.values():
+            if trabalhador["preso"]:
+                print(colored.fg('white'), colored.bg('red'),f"Policia acionada para apreensão do trabalhador {trabalhador['nome']}",colored.attr('reset'))
+                print('-----------')
+                trabalhador['status'] = "Irregular"   
+                
+        yield ambiente_de_simulacao.timeout(TEMPO_POLICIA)
 
 if __name__ == "__main__":
     preparar()
@@ -213,4 +234,5 @@ if __name__ == "__main__":
     ambiente_de_simulacao.process(reconhecer_motoristas(ambiente_de_simulacao))
     ambiente_de_simulacao.process(liberar_trabalhador(ambiente_de_simulacao))
     ambiente_de_simulacao.process(analisar_irregulariedade(ambiente_de_simulacao))
+    ambiente_de_simulacao.process(acionar_policia(ambiente_de_simulacao))
     ambiente_de_simulacao.run(until=2000)
