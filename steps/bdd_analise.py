@@ -84,13 +84,23 @@ def reconhecer_motoristas(trabalhadores_reconhecidos):
         id_atendimento = secrets.token_hex(nbytes=16).upper()
         trabalhadores_em_reconhecimento[id_atendimento] = trabalhador
 
-        # imprimir informações do trabalhador
         imprimir_dados_do_trabalhador(trabalhador)
 
     return len(trabalhadores_em_reconhecimento) > 0, trabalhadores_em_reconhecimento
 
-
-
+def liberar_trabalhador(trabalhadores_em_reconhecimento, probabilidade_de_liberacao):
+    total_de_trabalhadores_liberados = 0
+    
+    
+    for id_atendimento, trabalhador in list(trabalhadores_em_reconhecimento.items()):
+        if not trabalhador["preso"]:
+            trabalhador_liberado = (random.randint(1, 100)) <= probabilidade_de_liberacao
+            if trabalhador_liberado:
+                trabalhadores_em_reconhecimento.pop(id_atendimento)
+                
+                total_de_trabalhadores_liberados += 1
+    
+    return total_de_trabalhadores_liberados
 
 
 
