@@ -21,7 +21,7 @@ def then_um_trabalhador_reconhecido(context):
     
 @then("pelo menos um trabalhador deve ter seu perfil analisado no banco de dados")
 def then_um_trabalhador_analisado(context):
-    tem_trabalhador_em_analise, context.trabalhadores_em_analise = reconhecer_motoristas(context.trabalhadores)
+    tem_trabalhador_em_analise, context.trabalhadores_em_reconhecimento = reconhecer_motoristas(context.trabalhadores)
 
     assert tem_trabalhador_em_analise
     
