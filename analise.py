@@ -26,7 +26,6 @@ PROBABILIDADE_DE_IRREGULARIEDADE_ALTA = 30
 TEMPO_DE_DETECCAO_DE_TRABALHADOR = 40
 TEMPO_DE_LIBERACAO_DE_TRABALHADOR = 80
 TEMPO_MEDIO_DE_ANALISE = 40
-TEMPO_MEDIO_DE_MULTA = 60
 TEMPO_POLICIA = 40
 
 
@@ -194,7 +193,7 @@ def analisar_irregulariedade(ambiente_de_simulacao):
                         print('-----------')
                         situacao_reconhecida2 = False
                         
-                        yield ambiente_de_simulacao.timeout(TEMPO_MEDIO_DE_MULTA)
+                        
                     if situacao_reconhecida2:
                         trabalhadores_reconhecidos[id_atendimento]["preso"] = True
                         print(colored.fg('white'), colored.bg('red'),f"Acionando policia para o atendimento {id_atendimento}",colored.attr('reset'))
