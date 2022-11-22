@@ -102,7 +102,19 @@ def liberar_trabalhador(trabalhadores_em_reconhecimento, probabilidade_de_libera
     
     return total_de_trabalhadores_liberados
 
-
+def analisar_irregulariedade(trabalhadores_em_reconhecimento, probabilidade_de_irregular):
+    total_de_trabalhadores_irregulares = 0
+    
+    for id_atendimento, trabalhador in list(trabalhadores_em_reconhecimento.items()):
+        if not trabalhador["multa"]:
+            trabalhador_com_multa = (random.randint(1,100) <= probabilidade_de_irregular)
+            if trabalhador_com_multa:
+                valor_multa = random.randint(100,300)
+                trabalhadores_em_reconhecimento[id_atendimento]["multa"] = valor_multa
+                
+                total_de_trabalhadores_irregulares += 1
+                
+    return total_de_trabalhadores_irregulares
 
 
 
