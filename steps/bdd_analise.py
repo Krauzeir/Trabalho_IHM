@@ -111,10 +111,27 @@ def analisar_irregulariedade(trabalhadores_em_reconhecimento, probabilidade_de_i
             if trabalhador_com_multa:
                 valor_multa = random.randint(100,300)
                 trabalhadores_em_reconhecimento[id_atendimento]["multa"] = valor_multa
-                
+                print(f"O {trabalhador['nome']} recebeu a multa no valor de R${valor_multa},00")
                 total_de_trabalhadores_irregulares += 1
                 
     return total_de_trabalhadores_irregulares
+
+def acionar_policia(trabalhadores_em_reconhecimento, probabilidade_irregulariedade_alta):
+    total_de_trabalhadores_presos = 0
+    
+    for trabalhador in trabalhadores_em_reconhecimento.values():
+        if trabalhador["multa"] and not trabalhador["preso"]:
+            prender_trabalhador = (random.randint(1,100)) <= probabilidade_irregulariedade_alta
+            if prender_trabalhador:
+                trabalhador["preso"] = True
+                meliante = trabalhador["nome"]
+                print(f"Policia acionada para o trabalhador {meliante}")
+                    
+                total_de_trabalhadores_presos += 1
+            else:
+                print(f"O trabalhador {trabalhador['nome']} recebeu a multa e será liberado")
+    
+    return total_de_trabalhadores_presos
 
 
 
